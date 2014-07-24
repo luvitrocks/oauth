@@ -1,0 +1,20 @@
+{
+  "name": "luvit-module",
+  "version": "0.0.0",
+  "description": "",
+  "main": "init.lua",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "",
+    "url": ""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": ""
+  },
+  "homepage": ""
+}
