@@ -7,8 +7,6 @@ local table = require('table')
 local string = require('string')
 local math = require('math')
 
---p(crypto)
-
 -- generates a unix timestamp
 local function generateTimestamp ()
 	return tostring(os.time())
@@ -55,22 +53,52 @@ function OAuth:initialize (opts)
 	self.headers = opts.customHeaders or {['Accept']='*/*', ['Connection'] ='close', ['User-Agent'] = 'Luvit authentication'}
 end
 
--- e.g. oauth:request('http://twitter.com/api/update.json', {method='POST', }, function () end)
-function OAuth:request (uri, opts, callback)
-	if not uri or type(uri) ~= 'string' then
-		return error('Request uri is required and should be String value')
+function OAuth:getOAuthRequestToken (extraParams, callback)
+	-- body
+end
+
+function OAuth:getOAuthAccessToken (oauth_token, oauth_token_secret, oauth_verifier, callback)
+	-- body
+end
+
+---
+-- After retrieving an access token, this method is used to issue properly authenticated requests.
+-- (see http://tools.ietf.org/html/rfc5849#section-3)
+-- @param url - the url to request
+-- @parem opts - table of required and optional fields
+--  `oauth_token` - required
+--  `oauth_token_secret` - required
+--  `method` - the http method (defaults to GET)
+--  `headers` - an optional table with http headers to be sent in the request
+--  `arguments` - an optional table whose keys and values will be encoded as "application/x-www-form-urlencoded"
+--   (when doing a POST) or encoded and sent in the query string (when doing a GET).
+--   It can also be a string with the body to be sent in the request (usually a POST). In that case, you need to supply
+--   a valid Content-Type header
+-- @param callback - it's called with an (optional) error object and the result of the request.
+--
+-- e.g. oauth:request('http://twitter.com/api/update.json',
+--         {method='POST', oauth_token='12345', oauth_token_secret='secret'},
+--         function (err, res) end)
+---
+function OAuth:request (url, opts, callback)
+	if not url or type(url) ~= 'string' then
+		return error('Request url is required and should be String value')
+	end
+
+	if type(opts) ~= 'table' then
+		return error('Options should be Table value')
 	end
 
 	opts = opts or {}
 
 	local method = opts.method:upper() or 'GET'
+	opts.oauth_token = opts.oauth_token or error('No oauth_token property')
+	opts.oauth_token_secret = opts.oauth_token_secret or error('No oauth_token_secret property')
 
-	local headers, arguments, post_body = self:_buildRequest(method, uri, opts.params, opts.headers)
+	local headers, arguments, post_body = self:_buildRequest(method, url, opts.params, opts.headers)
 end
 
 function OAuth:_buildRequest(method, url, arguments, headers)
-	assert(type(method) == "string", "'method' must be a string")
-
 	local args = {
 		oauth_consumer_key = self.consumer_key,
 		oauth_nonce = generateNonce(self.nonce_size),
