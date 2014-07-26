@@ -8,10 +8,18 @@ local URL = require('url')
 local table = require('table')
 local string = require('string')
 local math = require('math')
+local base64 = require('base64')
 
 -- generates a unix timestamp
 local function generateTimestamp ()
 	return tostring(os.time())
+end
+
+-- encoding following OAuth's specific semantics
+local function oauthEncode (val)
+	return val:gsub('[^-._~a-zA-Z0-9]', function (letter)
+		return string.format("%%%02x", letter:byte()):upper()
+	end)
 end
 
 -- generates a nonce (number used once)
@@ -81,7 +89,7 @@ function OAuth:getOAuthRequestToken (extraParams, callback)
 
 	local opts = {
 		method = self.clientOptions.requestTokenHttpMethod,
-		params = extraParams
+		extraParams = extraParams
 	}
 
 	self:request(self.requestUrl, opts, function (err, data, resp)
@@ -131,7 +139,7 @@ function OAuth:request (url, opts, callback)
 	if parsedURL.protocol == 'http:' and not parsedURL.port then parsedURL.port = 80 end
 	if parsedURL.protocol == 'https:' and not parsedURL.port then parsedURL.port = 443 end
 
-	local orderedParams = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, method, url, parsedURL, opts.extraParams)
+	local orderedParams = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, opts.method, url, parsedURL, opts.extraParams)
 
 
 	-- local method = opts.method:upper() or 'GET'
@@ -174,6 +182,59 @@ function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, url, par
 	end
 
 	p(oauthParams)
+	p(self:_normaliseRequestParams(oauthParams))
+	--p(crypto.sign.new('RSA-SHA1'))
+	local signature = self:_getSignature(method, url, self:_normaliseRequestParams(oauthParams), oauth_token_secret)
+end
+
+function OAuth:_normaliseRequestParams (arguments)
+	-- oauth-encode each key and value, and get them set up for a Lua table sort.
+	local keys_and_values = {}
+
+	for key, val in pairs(arguments) do
+		table.insert(keys_and_values, {
+			key = oauthEncode(key),
+			val = oauthEncode(tostring(val))
+		})
+	end
+
+	-- sort by key first, then value
+	table.sort(keys_and_values, function (a, b)
+		if a.key < b.key then
+			return true
+		elseif a.key > b.key then
+			return false
+		else
+			return a.val < b.val
+		end
+	end)
+
+	-- now combine key and value into key=value
+	local key_value_pairs = {}
+	for _, rec in pairs(keys_and_values) do
+		table.insert(key_value_pairs, rec.key .. '=' .. rec.val)
+	end
+
+	return table.concat(key_value_pairs, '&')
+end
+
+function OAuth:_getSignature (method, url, params, oauth_token_secret)
+	oauth_token_secret = oauth_token_secret or ''
+
+	local signatureBase = method .. '&' .. oauthEncode(url) .. '&' .. oauthEncode(params)
+	p(signatureBase)
+	local signatureKey = oauthEncode(self.consumer_secret) .. '&' .. oauthEncode(oauth_token_secret)
+
+	local hash = ''
+	if self.signature_method == 'PLAINTEXT' then
+		hash = signatureKey
+	elseif self.signature_method == 'RSA-SHA1' then
+		--hash = crypto.sign.new('RSA-SHA1')
+	else
+		hash = crypto.hmac.digest('sha1', signatureBase, signatureKey)
+	end
+
+	p(hash)
 end
 
 function OAuth:_buildRequest (method, url, opts)
@@ -222,10 +283,6 @@ function OAuth:_createClient (port, hostname, method, path, headers, protocol)
 
 	local httpModel = (protocol == 'https' and https) or http
 	return httpModel.request(options);
-end
-
-function OAuth:_createSignature ()
-	-- body
 end
 
 return OAuth
