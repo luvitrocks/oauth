@@ -8,7 +8,7 @@ local URL = require('url')
 local table = require('table')
 local string = require('string')
 local math = require('math')
-local base64 = require('base64')
+local base64Encode = require('./helpers').base64Encode
 
 -- generates a unix timestamp
 local function generateTimestamp ()
@@ -61,7 +61,7 @@ function OAuth:initialize (opts)
 	end
 	self.version = opts.version or '1.0'
 	self.nonce_size = opts.nonce_size or 32
-	self.authorize_callback = opts.authorize_callback or 'oob'
+	self.authorize_callback = opts.authorize_callback or nil
 	self.headers = opts.customHeaders or {['Accept']='*/*', ['Connection'] ='close', ['User-Agent'] = 'Luvit authentication'}
 	self.clientOptions = {requestTokenHttpMethod='POST', accessTokenHttpMethod='POST', followRedirects=true}
 end
@@ -139,16 +139,31 @@ function OAuth:request (url, opts, callback)
 	if parsedURL.protocol == 'http:' and not parsedURL.port then parsedURL.port = 80 end
 	if parsedURL.protocol == 'https:' and not parsedURL.port then parsedURL.port = 443 end
 
-	local orderedParams = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, opts.method, url, parsedURL, opts.extraParams)
+	local method = opts.method:upper() or 'GET'
 
+	local orderedParams, signature = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, method, url, parsedURL, opts.extraParams)
+	local authHeaders = self:_buildAuthorizationHeaders(orderedParams, signature)
+	p(authHeaders)
 
-	-- local method = opts.method:upper() or 'GET'
-	-- local oauth_token = opts.oauth_token or error('No oauth_token property')
-	-- local oauth_token_secret = opts.oauth_token_secret or error('No oauth_token_secret property')
-	-- local post_content_type = opts.post_content_type or 'application/x-www-form-urlencoded'
+	local headers = {}
 
-	-- local headers, params, post_body = self:_buildRequest(oauth_token, oauth_token_secret, method, url, post_content_type)
-	-- local request = self:_createClient(parsedURL.port, parsedURL.hostname, method, headers, parsedURL.protocol)
+	headers['Authorization'] = authHeaders
+	headers['Host'] = parsedURL.host
+	headers['Content-Type'] = opts.post_content_type or 'application/x-www-form-urlencoded'
+
+	for key, value in pairs(self.headers) do
+		headers[key] = value
+	end
+
+	for key, value in pairs(opts.extraParams) do
+		if type(key) == 'string' and key:match('^oauth_') then
+			opts.extraParams[key] = nil
+		end
+	end
+
+	p(opts.extraParams)
+
+	--local request = self:_createClient(parsedURL.port, parsedURL.hostname, method, headers, parsedURL.protocol)
 end
 
 function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, url, parsedURL, extraParams)
@@ -183,8 +198,9 @@ function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, url, par
 
 	p(oauthParams)
 	p(self:_normaliseRequestParams(oauthParams))
-	--p(crypto.sign.new('RSA-SHA1'))
 	local signature = self:_getSignature(method, url, self:_normaliseRequestParams(oauthParams), oauth_token_secret)
+
+	return oauthParams, signature
 end
 
 function OAuth:_normaliseRequestParams (arguments)
@@ -229,12 +245,34 @@ function OAuth:_getSignature (method, url, params, oauth_token_secret)
 	if self.signature_method == 'PLAINTEXT' then
 		hash = signatureKey
 	elseif self.signature_method == 'RSA-SHA1' then
-		--hash = crypto.sign.new('RSA-SHA1')
+		hash = crypto.sign('sha1', signatureBase, signatureKey)
+		hash = base64Encode(hash)
 	else
-		hash = crypto.hmac.digest('sha1', signatureBase, signatureKey)
+		hash = crypto.hmac.digest('sha1', signatureBase, signatureKey, true)
+		hash = base64Encode(hash)
 	end
 
-	p(hash)
+	return hash
+end
+
+function OAuth:_buildAuthorizationHeaders (oauthParams, signature)
+	local oauth_headers = {}
+	local first_header = true
+
+	for k,v in pairs(oauthParams) do
+		if k:match('^oauth_') then
+			if first_header then
+				k = 'OAuth ' .. k
+				first_header = false
+			end
+			table.insert(oauth_headers, k .. '=\"' .. oauthEncode(v) .. "\"")
+		end
+	end
+
+	table.insert(oauth_headers, 'oauth_signature=\"' .. signature .. '\"')
+	oauth_headers = table.concat(oauth_headers, ', ')
+
+	return oauth_headers
 end
 
 function OAuth:_buildRequest (method, url, opts)
