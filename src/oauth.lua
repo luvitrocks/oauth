@@ -99,6 +99,7 @@ function OAuth:request (url, opts, callback)
 
 	headers['Authorization'] = authHeaders
 	headers['Host'] = parsedURL.host
+	headers['Content-Type'] = opts.post_content_type or 'application/x-www-form-urlencoded'
 
 	for key, value in pairs(self.headers) do
 		headers[key] = value
@@ -118,8 +119,8 @@ function OAuth:request (url, opts, callback)
 		path = parsedURL.pathname
 	end
 
+ 	-- to do: handle post_body
 	headers['Content-Length'] = 0
-	headers['Content-Type'] = opts.post_content_type or 'application/x-www-form-urlencoded'
 
 	local data = ''
 	local function passBackControl (response)
