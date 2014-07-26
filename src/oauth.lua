@@ -2,46 +2,14 @@ local Object = require('core').Object
 local crypto = require('_crypto')
 local http = require('http')
 local https = require('https')
-local os = require('os')
 local qs = require('querystring')
 local URL = require('url')
 local table = require('table')
 local string = require('string')
-local math = require('math')
-local base64Encode = require('./helpers').base64Encode
 
--- generates a unix timestamp
-local function generateTimestamp ()
-	return tostring(os.time())
-end
-
--- encoding following OAuth's specific semantics
-local function oauthEncode (val)
-	return val:gsub('[^-._~a-zA-Z0-9]', function (letter)
-		return string.format("%%%02x", letter:byte()):upper()
-	end)
-end
-
--- generates a nonce (number used once)
-local NONCE_CHARS = {
-	'a','b','c','d','e','f','g','h','i','j','k','l','m','n',
-	'o','p','q','r','s','t','u','v','w','x','y','z','A','B',
-	'C','D','E','F','G','H','I','J','K','L','M','N','O','P',
-	'Q','R','S','T','U','V','W','X','Y','Z','0','1','2','3',
-	'4','5','6','7','8','9'
-}
-local function generateNonce (nonceSize)
-	local result = {}
-
-	for i = 1, nonceSize do
-		local char_pos = math.floor(math.random() * #NONCE_CHARS)
-		result[i] = NONCE_CHARS[char_pos]
-	end
-
-	return table.concat(result, '')
-
-	--return crypto.hmac.new('sha1', "keyyyy"):update(nonce):final('hex')
-end
+-- helper functions
+local h = require('./helpers')
+local generateTimestamp, generateNonce, oauthEncode, base64Encode = h.generateTimestamp, h.generateNonce, h.oauthEncode, h.base64Encode
 
 local OAuth = Object:extend()
 
@@ -273,41 +241,6 @@ function OAuth:_buildAuthorizationHeaders (oauthParams, signature)
 	oauth_headers = table.concat(oauth_headers, ', ')
 
 	return oauth_headers
-end
-
-function OAuth:_buildRequest (method, url, opts)
-	local args = {
-		oauth_consumer_key = self.consumer_key,
-		oauth_nonce = generateNonce(self.nonce_size),
-		oauth_signature_method = self.signature_method,
-		oauth_timestamp = generateTimestamp(),
-		oauth_version = self.version
-	}
-
-	local headers = {}
-	headers['Authorization'] = self:_buildAuthorizationHeader();
-	headers['Content-Type'] = opts.post_content_type;
-
-
-	local oauth_signature, post_body, authHeader = self:Sign(method, url, args, oauth_token_secret)
-	local headers = merge({}, headers)
-	if self.m_supportsAuthHeader then
-		headers["Authorization"] = authHeader
-	end
-
-	-- Remove oauth_related arguments
-	if type(arguments) == 'table' then
-		for k,v in pairs(arguments) do
-			if type(k) == 'string' and k:match('^oauth_') then
-				arguments[k] = nil
-			end
-		end
-		if not next(arguments) then
-			arguments = nil
-		end
-	end
-
-	return headers, arguments, post_body
 end
 
 function OAuth:_createClient (port, hostname, method, path, headers, protocol)
