@@ -74,24 +74,7 @@ function OAuth:getOAuthAccessToken (oauth_token, oauth_token_secret, oauth_verif
 	-- body
 end
 
----
--- After retrieving an access token, this method is used to issue properly authenticated requests.
--- (see http://tools.ietf.org/html/rfc5849#section-3)
--- @param url - the url to request
--- @parem opts - table of required and optional fields
---  `oauth_token` - required
---  `oauth_token_secret` - required
---  `method` - the http method (defaults to GET)
---  `params` - an optional table whose keys and values will be encoded as "application/x-www-form-urlencoded"
---   (when doing a POST) or encoded and sent in the query string (when doing a GET).
---   It can also be a string with the body to be sent in the request (usually a POST). In that case, you need to supply
---   a valid Content-Type header
--- @param callback - it's called with an (optional) error object and the result of the request.
---
--- e.g. oauth:request('http://twitter.com/api/update.json',
---         {method='POST', oauth_token='12345', oauth_token_secret='secret'},
---         function (err, res) end)
----
+
 function OAuth:request (url, opts, callback)
 	if not url or type(url) ~= 'string' then
 		return error('Request url is required and should be a String value')
@@ -104,20 +87,18 @@ function OAuth:request (url, opts, callback)
 	opts = opts or {}
 
 	local parsedURL = URL.parse(url)
-	if parsedURL.protocol == 'http:' and not parsedURL.port then parsedURL.port = 80 end
-	if parsedURL.protocol == 'https:' and not parsedURL.port then parsedURL.port = 443 end
+	if parsedURL.protocol == 'http' and not parsedURL.port then parsedURL.port = 80 end
+	if parsedURL.protocol == 'https' and not parsedURL.port then parsedURL.port = 443 end
 
 	local method = opts.method:upper() or 'GET'
 
 	local orderedParams, signature = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, method, url, parsedURL, opts.extraParams)
 	local authHeaders = self:_buildAuthorizationHeaders(orderedParams, signature)
-	p(authHeaders)
 
 	local headers = {}
 
 	headers['Authorization'] = authHeaders
 	headers['Host'] = parsedURL.host
-	headers['Content-Type'] = opts.post_content_type or 'application/x-www-form-urlencoded'
 
 	for key, value in pairs(self.headers) do
 		headers[key] = value
@@ -129,9 +110,38 @@ function OAuth:request (url, opts, callback)
 		end
 	end
 
-	p(opts.extraParams)
+	local path
+	if not parsedURL.pathname or parsedURL.pathname == '' then path = '/' end
+	if parsedURL.query then
+		path = parsedURL.pathname .. '?' .. parsedURL.query
+	else
+		path = parsedURL.pathname
+	end
 
-	--local request = self:_createClient(parsedURL.port, parsedURL.hostname, method, headers, parsedURL.protocol)
+	headers['Content-Length'] = 0
+	headers['Content-Type'] = opts.post_content_type or 'application/x-www-form-urlencoded'
+
+	local data = ''
+	local function passBackControl (response)
+		p(data)
+	end
+	local request = self:_createClient(parsedURL.port, parsedURL.hostname, method, path, headers, parsedURL.protocol)
+	request:on('response', function (response)
+		p(response.statusCode)
+
+		response:on('data', function (chunk)
+			data = data .. chunk
+		end)
+
+		response:on('end', function ()
+			passBackControl(response)
+		end)
+	end)
+	request:on('error', function (resp)
+		p('error')
+		p(resp)
+	end)
+	request:done()
 end
 
 function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, url, parsedURL, extraParams)
@@ -164,11 +174,10 @@ function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, url, par
 		end
 	end
 
-	p(oauthParams)
-	p(self:_normaliseRequestParams(oauthParams))
-	local signature = self:_getSignature(method, url, self:_normaliseRequestParams(oauthParams), oauth_token_secret)
+	local normalizedString, authPairs = self:_normaliseRequestParams(oauthParams)
+	local signature = self:_getSignature(method, url, normalizedString, oauth_token_secret)
 
-	return oauthParams, signature
+	return authPairs, signature
 end
 
 function OAuth:_normaliseRequestParams (arguments)
@@ -199,21 +208,21 @@ function OAuth:_normaliseRequestParams (arguments)
 		table.insert(key_value_pairs, rec.key .. '=' .. rec.val)
 	end
 
-	return table.concat(key_value_pairs, '&')
+	return table.concat(key_value_pairs, '&'), keys_and_values
 end
 
 function OAuth:_getSignature (method, url, params, oauth_token_secret)
 	oauth_token_secret = oauth_token_secret or ''
 
 	local signatureBase = method .. '&' .. oauthEncode(url) .. '&' .. oauthEncode(params)
-	p(signatureBase)
 	local signatureKey = oauthEncode(self.consumer_secret) .. '&' .. oauthEncode(oauth_token_secret)
 
 	local hash = ''
 	if self.signature_method == 'PLAINTEXT' then
 		hash = signatureKey
 	elseif self.signature_method == 'RSA-SHA1' then
-		hash = crypto.sign('sha1', signatureBase, signatureKey)
+		local privateKey = oauthEncode(self.consumer_secret)
+		hash = crypto.sign('sha1', signatureBase, privateKey)
 		hash = base64Encode(hash)
 	else
 		hash = crypto.hmac.digest('sha1', signatureBase, signatureKey, true)
@@ -227,17 +236,29 @@ function OAuth:_buildAuthorizationHeaders (oauthParams, signature)
 	local oauth_headers = {}
 	local first_header = true
 
-	for k,v in pairs(oauthParams) do
-		if k:match('^oauth_') then
-			if first_header then
-				k = 'OAuth ' .. k
-				first_header = false
-			end
-			table.insert(oauth_headers, k .. '=\"' .. oauthEncode(v) .. "\"")
+	for _, rec in pairs(oauthParams) do
+		if first_header then
+			rec.key = 'OAuth ' .. rec.key
+			first_header = false
 		end
+		table.insert(oauth_headers, rec.key .. '=\"' .. oauthEncode(rec.val) .. '\"')
 	end
 
-	table.insert(oauth_headers, 'oauth_signature=\"' .. signature .. '\"')
+	-- for k,v in pairs(oauthParams) do
+	-- 	if k:match('^oauth_') then
+	-- 		if first_header then
+	-- 			k = 'OAuth ' .. k
+	-- 			first_header = false
+	-- 		end
+	-- 		table.insert(oauth_headers, k .. '=\"' .. oauthEncode(v) .. "\"")
+	-- 	end
+	-- end
+
+	-- table.insert(oauth_headers, 'oauth_signature=\"' .. signature .. '\"')
+	-- oauth_headers = table.concat(oauth_headers, ', ')
+
+
+	table.insert(oauth_headers, 'oauth_signature=\"' .. oauthEncode(signature) .. '\"')
 	oauth_headers = table.concat(oauth_headers, ', ')
 
 	return oauth_headers
@@ -252,8 +273,11 @@ function OAuth:_createClient (port, hostname, method, path, headers, protocol)
 		headers = headers
 	}
 
-	local httpModel = (protocol == 'https' and https) or http
-	return httpModel.request(options);
+	p(options)
+
+	local httpModel
+	if (protocol == 'https') then httpModel = https else httpModel = http end
+	return httpModel.request(options)
 end
 
 return OAuth
