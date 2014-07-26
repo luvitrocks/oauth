@@ -74,7 +74,6 @@ function OAuth:getOAuthAccessToken (oauth_token, oauth_token_secret, oauth_verif
 	-- body
 end
 
-
 function OAuth:request (url, opts, callback)
 	if not url or type(url) ~= 'string' then
 		return error('Request url is required and should be a String value')
@@ -119,7 +118,7 @@ function OAuth:request (url, opts, callback)
 		path = parsedURL.pathname
 	end
 
- 	-- to do: handle post_body
+	-- to do: handle post_body
 	headers['Content-Length'] = 0
 
 	local data = ''
@@ -175,10 +174,10 @@ function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, url, par
 		end
 	end
 
-	local normalizedString, authPairs = self:_normaliseRequestParams(oauthParams)
+	local normalizedString, orderedParams = self:_normaliseRequestParams(oauthParams)
 	local signature = self:_getSignature(method, url, normalizedString, oauth_token_secret)
 
-	return authPairs, signature
+	return orderedParams, signature
 end
 
 function OAuth:_normaliseRequestParams (arguments)
@@ -238,26 +237,14 @@ function OAuth:_buildAuthorizationHeaders (oauthParams, signature)
 	local first_header = true
 
 	for _, rec in pairs(oauthParams) do
-		if first_header then
-			rec.key = 'OAuth ' .. rec.key
-			first_header = false
+		if rec.key:match('^oauth_') then
+			if first_header then
+				rec.key = 'OAuth ' .. rec.key
+				first_header = false
+			end
+			table.insert(oauth_headers, rec.key .. '=\"' .. oauthEncode(rec.val) .. '\"')
 		end
-		table.insert(oauth_headers, rec.key .. '=\"' .. oauthEncode(rec.val) .. '\"')
 	end
-
-	-- for k,v in pairs(oauthParams) do
-	-- 	if k:match('^oauth_') then
-	-- 		if first_header then
-	-- 			k = 'OAuth ' .. k
-	-- 			first_header = false
-	-- 		end
-	-- 		table.insert(oauth_headers, k .. '=\"' .. oauthEncode(v) .. "\"")
-	-- 	end
-	-- end
-
-	-- table.insert(oauth_headers, 'oauth_signature=\"' .. signature .. '\"')
-	-- oauth_headers = table.concat(oauth_headers, ', ')
-
 
 	table.insert(oauth_headers, 'oauth_signature=\"' .. oauthEncode(signature) .. '\"')
 	oauth_headers = table.concat(oauth_headers, ', ')
