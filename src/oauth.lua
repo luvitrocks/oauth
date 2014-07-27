@@ -83,6 +83,10 @@ function OAuth:request (url, opts, callback)
 		return error('Options should be a Table value')
 	end
 
+	if type(callback) ~= 'function' then
+		return error('Callback function is required')
+	end
+
 	opts = opts or {}
 
 	local parsedURL = URL.parse(url)
