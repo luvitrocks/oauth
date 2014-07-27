@@ -8,7 +8,7 @@ local table = require('table')
 local string = require('string')
 
 -- helper functions
-local h = require('./helpers')
+local h = require('./_helpers')
 local generateTimestamp, generateNonce, oauthEncode, base64Encode = h.generateTimestamp, h.generateNonce, h.oauthEncode, h.base64Encode
 
 local OAuth = Object:extend()
@@ -121,13 +121,27 @@ function OAuth:request (url, opts, callback)
 	-- to do: handle post_body
 	headers['Content-Length'] = 0
 
+	local allowEarlyClose = h.isAnEarlyCloseHost(parsedURL.hostname)
 	local data = ''
+	local callbackCalled = false
 	local function passBackControl (response)
-		p(data)
+		if callbackCalled then return end
+
+		callbackCalled = true
+		if response.statusCode >= 200 and response.statusCode <= 299 then
+			p(data)
+			callback(nil, data, response)
+		else
+			if (response.statusCode == 301 or response.statusCode == 302) and self.clientOptions.followRedirects and response.headers and response.headers.location then
+				self._performSecureRequest(url, opts, callback)
+			else
+				callback({statusCode = response.statusCode, data = data}, data, response)
+			end
+		end
 	end
 	local request = self:_createClient(parsedURL.port, parsedURL.hostname, method, path, headers, parsedURL.protocol)
 	request:on('response', function (response)
-		p(response.statusCode)
+		p(response)
 
 		response:on('data', function (chunk)
 			data = data .. chunk
@@ -137,9 +151,10 @@ function OAuth:request (url, opts, callback)
 			passBackControl(response)
 		end)
 	end)
-	request:on('error', function (resp)
-		p('error')
-		p(resp)
+	request:on('error', function (response)
+		if allowEarlyClose then
+			passBackControl(response)
+		end
 	end)
 	request:done()
 end
