@@ -94,6 +94,7 @@ function OAuth:request (url, opts, callback)
 	if parsedURL.protocol == 'https' and not parsedURL.port then parsedURL.port = 443 end
 
 	local method = opts.method:upper() or 'GET'
+	opts.method = method
 
 	local orderedParams, signature = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, method, url, parsedURL, opts.extraParams)
 	local authHeaders = self:_buildAuthorizationHeaders(orderedParams, signature)
@@ -102,7 +103,6 @@ function OAuth:request (url, opts, callback)
 
 	headers['Authorization'] = authHeaders
 	headers['Host'] = parsedURL.host
-	headers['Content-Type'] = opts.post_content_type or 'application/x-www-form-urlencoded'
 
 	for key, value in pairs(self.headers) do
 		headers[key] = value
@@ -122,8 +122,17 @@ function OAuth:request (url, opts, callback)
 		path = parsedURL.pathname
 	end
 
-	-- to do: handle post_body
-	headers['Content-Length'] = 0
+	if (method == 'POST' or method == 'PUT') and (opts.post_body == nil and opts.extraParams ~= nil) then
+		opts.post_body = h.stringify(opts.extraParams)
+	end
+
+	if opts.post_body then
+		headers['Content-Length'] = #opts.post_body
+	else
+		headers['Content-Length'] = 0
+	end
+
+	headers['Content-Type'] = opts.post_content_type or 'application/x-www-form-urlencoded'
 
 	local allowEarlyClose = h.isAnEarlyCloseHost(parsedURL.hostname)
 	local data = ''
@@ -145,8 +154,6 @@ function OAuth:request (url, opts, callback)
 	end
 	local request = self:_createClient(parsedURL.port, parsedURL.hostname, method, path, headers, parsedURL.protocol)
 	request:on('response', function (response)
-		p(response)
-
 		response:on('data', function (chunk)
 			data = data .. chunk
 		end)
@@ -160,6 +167,9 @@ function OAuth:request (url, opts, callback)
 			passBackControl(response)
 		end
 	end)
+	if (method == 'POST' or method == 'PUT') and opts.post_body ~= nil and opts.post_body ~= '' then
+		request:write(opts.post_body)
+	end
 	request:done()
 end
 

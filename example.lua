@@ -7,7 +7,7 @@ local oauth = OAuth:new({
 	consumerSecret = 'lLHPGQ8BJQZGz1KpT6TMlYGO6WvMrHztsc7Q3Ga8hhPU7ANhHu'
 })
 
-oauth:getOAuthRequestToken(function (err, requestToken, requestTokenSecret)
+oauth:getOAuthRequestToken({foo='bar'}, function (err, requestToken, requestTokenSecret)
 	p(err, requestToken, requestTokenSecret)
 	-- oauth:getOAuthAccessToken(requestToken, requestTokenSecret, function (err, accessToken, accessTokenSecret)
 

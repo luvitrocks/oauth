@@ -17,5 +17,7 @@
     "url": ""
   },
   "homepage": "",
-  "dependencies": {}
+  "dependencies": {
+    "luvit-querystring": "0.0.2"
+  }
 }

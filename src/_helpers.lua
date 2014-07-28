@@ -2,6 +2,7 @@ local string = require('string')
 local math = require('math')
 local table = require('table')
 local os = require('os')
+local qs = require('luvit-querystring')
 
 local exports = {}
 
@@ -70,5 +71,7 @@ end
 function exports.isAnEarlyCloseHost (hostName)
 	return hostName and hostName:match('.*google(apis)?.com$')
 end
+
+exports.stringify = qs.stringify
 
 return exports
