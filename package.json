@@ -1,22 +1,22 @@
 {
-  "name": "luvit-module",
-  "version": "0.0.0",
-  "description": "",
+  "name": "luvit-oauth",
+  "version": "0.0.1",
+  "description": "OAuth wrapper for luvit.io",
   "main": "init.lua",
   "scripts": {
     "test": ""
   },
   "repository": {
-    "type": "",
-    "url": ""
+    "type": "git",
+    "url": "git://github.com/luvitrocks/luvit-oauth.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["luvit", "oauth", "oauth2", "request", "auth", "wrapper"],
+  "author": "Dmitri Voronianski <dmitri.voronianski@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": ""
+    "url": "https://github.com/luvitrocks/luvit-oauth/issues"
   },
-  "homepage": "",
+  "homepage": "https://github.com/luvitrocks/luvit-oauth",
   "dependencies": {
     "luvit-querystring": "0.0.2"
   }
