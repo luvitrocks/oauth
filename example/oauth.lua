@@ -18,7 +18,6 @@ oauth:getOAuthRequestToken(function (err, requestToken, requestTokenSecret)
 		p('-----> Getting access tokens')
 
 		local pin = line:gsub('\n', '')
-		p(pin)
 		oauth:getOAuthAccessToken(requestToken, requestTokenSecret, tostring(pin), function (err, accessToken, accessTokenSecret)
 			p(err, accessToken, accessTokenSecret)
 			process.exit()
