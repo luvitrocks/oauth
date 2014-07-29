@@ -6,7 +6,7 @@ Tested against Twitter (http://twitter.com) and Github (http://github.com).
 
 Also provides rudimentary OAuth2 support, tested against github (in plans facebook, foursquare or google as well).
 
-# Install
+## Install
 
 ```bash
 npm install luvit-oauth
