@@ -1,6 +1,7 @@
 local string = require('string')
 local math = require('math')
 local table = require('table')
+local crypto = require('_crypto')
 local os = require('os')
 local qs = require('luvit-querystring')
 
@@ -29,9 +30,11 @@ local NONCE_CHARS = {
 function exports.generateNonce (nonceSize)
 	local result = {}
 
-	for i = 1, nonceSize do
+	local i = 1
+	while i < nonceSize do
 		local char_pos = math.floor(math.random() * #NONCE_CHARS)
 		result[i] = NONCE_CHARS[char_pos]
+		i = i + 1
 	end
 
 	return table.concat(result, '')

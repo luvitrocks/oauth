@@ -71,7 +71,26 @@ function OAuth:getOAuthRequestToken (extraParams, callback)
 end
 
 function OAuth:getOAuthAccessToken (oauth_token, oauth_token_secret, oauth_verifier, callback)
-	-- body
+	local extraParams = {}
+	if type(oauth_verifier) == 'function' then
+		callback = oauth_verifier
+	else
+		extraParams.oauth_verifier = oauth_verifier
+	end
+
+	local opts = {
+		method = self.clientOptions.accessTokenHttpMethod,
+		extraParams = extraParams
+	}
+
+	self:request(self.accessUrl, opts, function (err, data, resp)
+		if err then return callback(err) end
+
+		local results = qs.parse(data)
+		local oauth_access_token = results['oauth_token']
+		local oauth_access_token_secret = results['oauth_token_secret']
+		callback(nil, oauth_access_token, oauth_access_token_secret, results)
+	end)
 end
 
 function OAuth:request (url, opts, callback)
@@ -116,7 +135,7 @@ function OAuth:request (url, opts, callback)
 
 	local path
 	if not parsedURL.pathname or parsedURL.pathname == '' then path = '/' end
-	if parsedURL.query then
+	if parsedURL.query and parsedURL.query ~= '' then
 		path = parsedURL.pathname .. '?' .. parsedURL.query
 	else
 		path = parsedURL.pathname
@@ -289,8 +308,6 @@ function OAuth:_createClient (port, hostname, method, path, headers, protocol)
 		method = method,
 		headers = headers
 	}
-
-	p(options)
 
 	local httpModel
 	if (protocol == 'https') then httpModel = https else httpModel = http end
