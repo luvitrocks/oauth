@@ -1,8 +1,27 @@
 # luvit-oauth
 
+Simple [OAuth](http://en.wikipedia.org/wiki/OAuth) API for [luvit.io](http://luvit.io) . It allows users to authenticate against providers and thus act as OAuth consumers.
+
+Tested against Twitter (http://twitter.com) and Github (http://github.com).
+
+Also provides rudimentary OAuth2 support, tested against github (in plans facebook, foursquare or google as well).
+
+# Install
+
+```bash
+npm install luvit-oauth
+```
+
+If you're not familiar with npm check this out:
+
+- https://github.com/voronianski/luvit-npm-example#how-to
+- https://github.com/luvitrocks/luvit-utopia#install
+
 ## License
 
 MIT Licensed
+
+Copyright (c) 2014 Dmitri Voronianski [dmitri.voronianski@gmail.com](mailto:dmitri.voronianski@gmail.com)
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
