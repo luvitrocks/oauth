@@ -163,7 +163,6 @@ function OAuth:request (url, opts, callback)
 
 		callbackCalled = true
 		if response.statusCode >= 200 and response.statusCode <= 299 then
-			p(data)
 			callback(nil, data, response)
 		else
 			if (response.statusCode == 301 or response.statusCode == 302) and self.clientOptions.followRedirects and response.headers and response.headers.location then
