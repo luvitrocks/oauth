@@ -75,12 +75,14 @@ function OAuth:getOAuthAccessToken (oauth_token, oauth_token_secret, oauth_verif
 	if type(oauth_verifier) == 'function' then
 		callback = oauth_verifier
 	else
-		extraParams.oauth_verifier = oauth_verifier
+		extraParams.oauth_verifier = oauthEncode(oauth_verifier)
 	end
 
 	local opts = {
 		method = self.clientOptions.accessTokenHttpMethod,
-		extraParams = extraParams
+		extraParams = extraParams,
+		oauth_token = oauth_token,
+		oauth_token_secret = oauth_token_secret
 	}
 
 	self:request(self.accessUrl, opts, function (err, data, resp)
