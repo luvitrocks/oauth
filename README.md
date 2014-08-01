@@ -22,11 +22,30 @@ To run examples clone this repo execute them like ``luvit example/oauth.lua``:
 ### OAuth1.0
 
 ```lua
+local OAuth = require('../init').OAuth
+
+local oauth = OAuth:new({
+	requestUrl = 'https://api.twitter.com/oauth/request_token',
+	accessUrl = 'https://api.twitter.com/oauth/access_token',
+	consumerKey = '{{YOUR CONSUMER KEY}}',
+	consumerSecret = '{{YOUR CONSUMER SECRET}}'
+})
+
+oauth:getOAuthRequestToken(function (err, requestToken, requestTokenSecret)
+	p(err, requestToken, requestTokenSecret)
+
+	-- use your flow for verification
+	oauth:getOAuthAccessToken(requestToken, requestTokenSecret, {{YOUR OAUTH VERIFIER}}, function (err, accessToken, accessTokenSecret)
+		p(err, accessToken, accessTokenSecret)
+	end)
+end)
 ```
 
 and ``luvit example/oauth2.lua``:
 
 ### OAuth2.0
+
+**in progress**
 
 ```lua
 ```
