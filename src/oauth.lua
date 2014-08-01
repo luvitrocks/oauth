@@ -166,7 +166,7 @@ function OAuth:request (url, opts, callback)
 			callback(nil, data, response)
 		else
 			if (response.statusCode == 301 or response.statusCode == 302) and self.clientOptions.followRedirects and response.headers and response.headers.location then
-				self._performSecureRequest(url, opts, callback)
+				self:request(url, opts, callback)
 			else
 				callback({statusCode = response.statusCode, data = data}, data, response)
 			end

@@ -6,6 +6,7 @@ local qs = require('querystring')
 local table = require('table')
 local string = require('string')
 local JSON = require('json')
+local URL = require('url')
 
 local h = require('./_helpers')
 
@@ -57,17 +58,18 @@ function OAuth:getOAuthAccessToken (code, params, callback)
 
 	opts = {
 		method = 'POST',
-		post_headers = {['Content-Type'] = 'application/x-www-form-urlencoded'},
-		post_data = h.stringify(params)
+		post_body = h.stringify(params)
 	}
 
-	self:request(self._getAccessTokenUrl(), opts, function (err, data, resp)
+	self:request(self:_getAccessTokenUrl(), opts, function (err, data, resp)
 		if err then return callback(err) end
 
 		-- As of http://tools.ietf.org/html/draft-ietf-oauth-v2-07
 		-- responses should be in JSON
-		local parseStatus, results = pcall(json.parse, data)
-		if not parseStatus then return callback('JSON parsing error') end
+		local parseStatus, results = pcall(JSON.parse, data)
+		if not parseStatus then
+			results = qs.parse(data)
+		end
 
 		local access_token = results['access_token']
 		local refresh_token = results['refresh_token']
@@ -93,6 +95,79 @@ function OAuth:request (url, opts, callback)
 	local parsedURL = URL.parse(url)
 	if parsedURL.protocol == 'http' and not parsedURL.port then parsedURL.port = 80 end
 	if parsedURL.protocol == 'https' and not parsedURL.port then parsedURL.port = 443 end
+
+	local headers = {}
+
+	for k, value in pairs(self.customHeaders) do
+		headers[k] = value
+	end
+
+	opts.headers = opts.headers or {}
+	for k, value in pairs(opts.headers) do
+		headers[k] = value
+	end
+
+	headers['Host'] = parsedURL.host
+
+	if not headers['User-Agent'] or headers['User-Agent'] == '' then
+		headers['User-Agent'] = 'Luvit-oauth'
+	end
+
+	if opts.post_body then
+		headers['Content-Length'] = #opts.post_body
+	else
+		headers['Content-Length'] = 0
+	end
+
+	headers['Content-Type'] = opts.post_content_type or 'application/x-www-form-urlencoded'
+
+	if not parsedURL.query or parsedURL.query == '' then parsedURL.query = {} end
+
+	if opts.access_token and (not headers['Authorization'] or headers['Authorization'] == '') then
+		parsedURL.query[self.accessTokenName] = opts.access_token
+	end
+
+	local queryString = h.stringify(parsedURL.query)
+	if queryString ~= '' then queryString =  '?' .. queryString end
+
+	local path = parsedURL.pathname .. queryString
+
+	local allowEarlyClose = h.isAnEarlyCloseHost(parsedURL.hostname)
+	local data = ''
+	local callbackCalled = false
+	local function passBackControl (response)
+		if callbackCalled then return end
+
+		callbackCalled = true
+		if response.statusCode ~= 200 and response.statusCode ~= 301 and response.statusCode ~= 302 then
+			callback({statusCode = response.statusCode, data = data}, data, response)
+		else
+			callback(nil, data, response)
+		end
+	end
+	local request = self:_createClient(parsedURL.port, parsedURL.hostname, opts.method, path, headers, parsedURL.protocol)
+	request:on('response', function (response)
+		response:on('data', function (chunk)
+			data = data .. chunk
+		end)
+		response:on('close', function (err)
+			if allowEarlyClose then
+				passBackControl(response)
+			end
+		end)
+		response:on('end', function ()
+			passBackControl(response)
+		end)
+	end)
+	request:on('error', function (response)
+		if allowEarlyClose then
+			passBackControl(response)
+		end
+	end)
+	if (opts.method == 'POST' or opts.method == 'PUT') and opts.post_body ~= nil and opts.post_body ~= '' then
+		request:write(opts.post_body)
+	end
+	request:done()
 end
 
 function OAuth:_createClient (port, hostname, method, path, headers, protocol)
