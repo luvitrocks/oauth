@@ -22,7 +22,7 @@ To run examples clone this repo execute them like ``luvit example/oauth.lua``:
 ### OAuth1.0
 
 ```lua
-local OAuth = require('../init').OAuth
+local OAuth = require('luvit-oauth').OAuth
 
 local oauth = OAuth:new({
 	requestUrl = 'https://api.twitter.com/oauth/request_token',
@@ -46,7 +46,7 @@ and ``luvit example/oauth2.lua``:
 ### OAuth2.0
 
 ```lua
-local OAuth2 = require('../init').OAuth2
+local OAuth2 = require('luvit-oauth').OAuth2
 
 local oauth2 = OAuth2:new({
 	clientID = '{{YOUR CLIENT ID}}',
