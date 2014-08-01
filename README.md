@@ -45,9 +45,23 @@ and ``luvit example/oauth2.lua``:
 
 ### OAuth2.0
 
-**in progress**
-
 ```lua
+local OAuth2 = require('../init').OAuth2
+
+local oauth2 = OAuth2:new({
+	clientID = '624b40586646206ffac1',
+	clientSecret = '55f5b0d6b8bf524126a843f933a2b9a354e0ad83',
+	baseSite = 'https://github.com/login'
+})
+
+local opts = {redirect_uri = 'http://luvit.io/oauth'}
+
+-- go to received URL and copy code
+local authURL = oauth2:getAuthorizeUrl(opts)
+
+oauth2:getOAuthAccessToken('{{YOUR CODE}}', opts, function (err, access_token, refresh_token, results)
+	p(err, access_token, refresh_token, results)
+end)
 ```
 
 ## License
