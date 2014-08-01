@@ -1,6 +1,6 @@
 {
   "name": "luvit-oauth",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "OAuth wrapper for luvit.io",
   "main": "init.lua",
   "scripts": {
