@@ -35,7 +35,7 @@ oauth:getOAuthRequestToken(function (err, requestToken, requestTokenSecret)
 	p(err, requestToken, requestTokenSecret)
 
 	-- use your flow for verification
-	oauth:getOAuthAccessToken(requestToken, requestTokenSecret, {{YOUR OAUTH VERIFIER}}, function (err, accessToken, accessTokenSecret)
+	oauth:getOAuthAccessToken(requestToken, requestTokenSecret, '{{YOUR OAUTH VERIFIER}}', function (err, accessToken, accessTokenSecret)
 		p(err, accessToken, accessTokenSecret)
 	end)
 end)
