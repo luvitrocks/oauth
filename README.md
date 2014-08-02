@@ -17,7 +17,7 @@ If you're not familiar with npm check this out:
 
 ## Examples
 
-To run examples clone this repo, create your applications on Twitter (for OAuth example) and Github (OAutg2), paste necessary keys and secrets into files and execute them like ``luvit example/oauth.lua``:
+To run examples clone this repo, create your applications on Twitter (for [OAuth](http://en.wikipedia.org/wiki/OAuth) example) and Github (for [OAuth2](http://en.wikipedia.org/wiki/OAuth2#OAuth_2.0)), paste necessary keys and secrets into files and execute them like ``luvit example/oauth.lua``:
 
 ### OAuth1.0
 
