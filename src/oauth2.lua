@@ -184,4 +184,42 @@ function OAuth:_createClient (port, hostname, method, path, headers, protocol)
 	return httpModel.request(options)
 end
 
+-- shorteners
+function OAuth:get(url, opts, callback)
+	opts, callback = self:_shortenerValidator('GET', opts, callback)
+	return self:request(url, opts, callback)
+end
+
+function OAuth:post(url, opts, callback)
+	opts, callback = self:_shortenerValidator('POST', opts, callback)
+	return self:request(url, opts, callback)
+end
+
+function OAuth:put(url, opts, callback)
+	opts, callback = self:_shortenerValidator('PUT', opts, callback)
+	return self:request(url, opts, callback)
+end
+
+function OAuth:patch(url, opts, callback)
+	opts, callback = self:_shortenerValidator('PATCH', opts, callback)
+	return self:request(url, opts, callback)
+end
+
+function OAuth:delete(url, opts, callback)
+	opts, callback = self:_shortenerValidator('DELETE', opts, callback)
+	return self:request(url, opts, callback)
+end
+
+function OAuth:_shortenerValidator(method, opts, callback)
+	if type(opts) == 'function' then
+		callback = opts
+		opts = {}
+	else
+		opts = opts or {}
+	end
+
+	opts.method = method
+	return opts, callback
+end
+
 return OAuth
