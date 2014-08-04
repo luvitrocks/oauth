@@ -119,7 +119,9 @@ function OAuth:request (url, opts, callback)
 	if parsedURL.protocol == 'https' and not parsedURL.port then parsedURL.port = 443 end
 
 	local method = opts.method:upper() or 'GET'
+
 	opts.method = method
+	opts.extraParams = opts.extraParams or {}
 
 	local orderedParams, signature = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, method, url, parsedURL, opts.extraParams)
 	local authHeaders = self:_buildAuthorizationHeaders(orderedParams, signature)
