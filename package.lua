@@ -1,7 +1,7 @@
 -- for older versions of luvit and alternative package managers
 return {
 	name = "luvit-oauth",
-	version = "0.1.2",
+	version = "0.1.3",
 	description = "OAuth wrapper for luvit.io",
 	repository = {
 		url = "https://github.com/luvitrocks/luvit-oauth.git",
