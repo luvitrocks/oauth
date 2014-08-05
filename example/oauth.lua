@@ -4,14 +4,14 @@ local OAuth = require('../init').OAuth
 local oauth = OAuth:new({
 	requestUrl = 'https://api.twitter.com/oauth/request_token',
 	accessUrl = 'https://api.twitter.com/oauth/access_token',
-	consumerKey = 'VWJLiBROB4nSjwYYhovKZJlsa',
-	consumerSecret = 'lLHPGQ8BJQZGz1KpT6TMlYGO6WvMrHztsc7Q3Ga8hhPU7ANhHu'
+	consumerKey = '{YOUR CONSUMER KEY}',
+	consumerSecret = '{YOUR CONSUMER SECRET}'
 })
 
 p('-----> Starting Twitter OAuth')
 oauth:getOAuthRequestToken(function (err, requestToken, requestTokenSecret)
 	p(err, requestToken, requestTokenSecret)
-	p('Go to https://twitter.com/oauth/authorize?oauth_token=<YOUR REQUEST TOKEN> and paste pin here:')
+	p('Go to https://twitter.com/oauth/authorize?oauth_token=' .. requestToken .. ' and paste pin here:')
 
 	process.stdout:write('>  ')
 	process.stdin:on('data', function (line)
