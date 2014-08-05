@@ -11,5 +11,8 @@ return {
 		email = "dmitri.voronianski@gmail.com"
 	},
 	licenses = {"MIT"},
+	dependencies = {
+		"luvit-querystring"
+	},
 	main = 'init.lua'
 }
