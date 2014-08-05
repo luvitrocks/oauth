@@ -123,7 +123,7 @@ function OAuth:request (url, opts, callback)
 	opts.method = method
 	opts.extraParams = opts.extraParams or {}
 
-	local orderedParams, signature = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, method, url, parsedURL, opts.extraParams)
+	local orderedParams, signature = self:_prepareParams(opts.oauth_token, opts.oauth_token_secret, method, parsedURL, opts.extraParams)
 	local authHeaders = self:_buildAuthorizationHeaders(orderedParams, signature)
 
 	local headers = {}
@@ -199,7 +199,7 @@ function OAuth:request (url, opts, callback)
 	request:done()
 end
 
-function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, url, parsedURL, extraParams)
+function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, parsedURL, extraParams)
 	local oauthParams = {
 		oauth_consumer_key = self.consumer_key,
 		oauth_nonce = generateNonce(self.nonce_size),
@@ -230,9 +230,22 @@ function OAuth:_prepareParams (oauth_token, oauth_token_secret, method, url, par
 	end
 
 	local normalizedString, orderedParams = self:_normaliseRequestParams(oauthParams)
-	local signature = self:_getSignature(method, url, normalizedString, oauth_token_secret)
+	local signature = self:_getSignature(method, self:_normalizeUrl(parsedURL), normalizedString, oauth_token_secret)
 
 	return orderedParams, signature
+end
+
+function OAuth:_normalizeUrl (parsedURL)
+	local port = ''
+	if parsedURL.port then
+		if (parsedURL.protocol == 'http' and parsedURL.port ~= 80) or (parsedURL.protocol == 'https' and parsedURL.port ~= 443) then
+			port = ':' + parsedURL.port
+		end
+	end
+
+	if not parsedURL.pathname or parsedURL.pathname == '' then parsedURL.pathname = '/' end
+
+	return parsedURL.protocol .. '://' .. parsedURL.hostname .. port .. parsedURL.pathname
 end
 
 function OAuth:_normaliseRequestParams (arguments)
@@ -302,7 +315,7 @@ function OAuth:_buildAuthorizationHeaders (oauthParams, signature)
 	end
 
 	table.insert(oauth_headers, 'oauth_signature=\"' .. oauthEncode(signature) .. '\"')
-	oauth_headers = table.concat(oauth_headers, ', ')
+	oauth_headers = table.concat(oauth_headers, ',')
 
 	return oauth_headers
 end
