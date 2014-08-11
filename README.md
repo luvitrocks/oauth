@@ -98,7 +98,7 @@ Allows to make OAuth signed requests to provided API ``url``.
 
 ##### Options
 
-- ``method`` - http method that will be send, required (also see [shorteners]())
+- ``method`` - http method that will be send, required (also see [shorteners](https://github.com/luvitrocks/luvit-oauth#shorteners))
 - ``oauth_token`` required
 - ``oauth_token_secret`` required
 
