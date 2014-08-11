@@ -78,7 +78,11 @@ Create instance of ``OAuth`` class by calling ``:new(options)`` with options tab
 - ``accessUrl``
 - ``consumer_key``
 - ``consumer_secret``
-- ``signature_method`` - allowed crypto method, defaults to ``'HMAC-SHA1'``
+- ``signature_method`` - allowed by [spec](http://oauth.net/core/1.0/) signing crypto method. It could be ``HMAC-SHA1``, ``'PLAINTEXT'`` or ``RSA-SHA1``, defaults to ``'HMAC-SHA1'``
+- ``authorize_callback``
+- ``version`` - specification version, defaults to ``1.0``
+- ``oauth_callback``
+- ``customHeaders``
 
 ##### ``:setClientOptions(options)``
 
@@ -102,9 +106,9 @@ Allows to make OAuth signed requests to provided API ``url``.
 - ``oauth_token`` required
 - ``oauth_token_secret`` required
 
-##### Shorteners
+### Shorteners
 
-These methods allow to skip ``method`` field in request options:
+These methods allow to skip ``method`` field in request options for OAuth implementations:
 
 - ``:get(url, options, callback)``
 - ``:post(url, options, callback)``
