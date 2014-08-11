@@ -64,6 +64,54 @@ oauth2:getOAuthAccessToken('{{YOUR CODE}}', opts, function (err, access_token, r
 end)
 ```
 
+## API
+
+### OAuth1.0
+
+##### Initialize
+
+Create instance of ``OAuth`` class by calling ``:new(options)`` with options table as the only argument.
+
+##### Options
+
+- ``requestUrl``
+- ``accessUrl``
+- ``consumer_key``
+- ``consumer_secret``
+- ``signature_method`` - allowed crypto method, defaults to ``'HMAC-SHA1'``
+
+##### ``:setClientOptions(options)``
+
+##### Options
+
+- ``requestTokenHttpMethod`` - defaults ``'POST'``
+- ``accessTokenHttpMethod`` - defaults ``'POST'``
+- ``followRedirects`` - defaults ``true``
+
+##### ``:getOAuthRequestToken(extraParams, callback)``
+
+##### ``:getOAuthAccessToken(requestToken, requestTokenSecret, oauthVerifier, callback)``
+
+##### ``:request(url, options, callback)``
+
+Allows to make OAuth signed requests to provided API ``url``.
+
+##### Options
+
+- ``method`` - http method that will be send, required (also see [shorteners]())
+- ``oauth_token`` required
+- ``oauth_token_secret`` required
+
+##### Shorteners
+
+These methods allow to skip ``method`` field in request options:
+
+- ``:get(url, options, callback)``
+- ``:post(url, options, callback)``
+- ``:put(url, options, callback)``
+- ``:patch(url, options, callback)``
+- ``:delete(url, options, callback)``
+
 ## License
 
 MIT Licensed
