@@ -78,37 +78,40 @@ Create instance of ``OAuth`` class by calling ``:new(options)`` with options tab
 - ``accessUrl``
 - ``consumer_key``
 - ``consumer_secret``
-- ``signature_method`` - allowed by [spec](http://oauth.net/core/1.0/) signing crypto method. It could be ``HMAC-SHA1``, ``'PLAINTEXT'`` or ``RSA-SHA1``, defaults to ``'HMAC-SHA1'``
+- ``signature_method`` - allowed by [spec](http://oauth.net/core/1.0/) signing crypto method. It could be ``'HMAC-SHA1'``, ``'PLAINTEXT'`` or ``'RSA-SHA1'``, defaults to ``'HMAC-SHA1'``
 - ``authorize_callback``
-- ``version`` - specification version, defaults to ``1.0``
-- ``oauth_callback``
-- ``customHeaders``
+- ``version`` - optional spec version, defaults to ``1.0``
+- ``customHeaders`` - optional table with http headers to be sent in the requests
 
 ##### ``:setClientOptions(options)``
 
 ##### Options
 
-- ``requestTokenHttpMethod`` - defaults ``'POST'``
-- ``accessTokenHttpMethod`` - defaults ``'POST'``
-- ``followRedirects`` - defaults ``true``
+- ``requestTokenHttpMethod`` - default ``'POST'``
+- ``accessTokenHttpMethod`` - default ``'POST'``
+- ``followRedirects`` - default ``true``
 
 ##### ``:getOAuthRequestToken(extraParams, callback)``
 
+Requests an unauthorized request token (http://tools.ietf.org/html/rfc5849#section-2.1).
+
 ##### ``:getOAuthAccessToken(requestToken, requestTokenSecret, oauthVerifier, callback)``
+
+Exchanges a request token for an access token (http://tools.ietf.org/html/rfc5849#section-2.3).
 
 ##### ``:request(url, options, callback)``
 
-Allows to make OAuth signed requests to provided API ``url``.
+Allows to make OAuth signed requests to provided API ``url`` string.
 
 ##### Options
 
-- ``method`` - http method that will be send, required (also see [shorteners](https://github.com/luvitrocks/luvit-oauth#shorteners))
+- ``method`` - http method that will be send, required (not necessary with [shorteners](https://github.com/luvitrocks/luvit-oauth#shorteners))
 - ``oauth_token`` required
 - ``oauth_token_secret`` required
 
 ### Shorteners
 
-These methods allow to skip ``method`` field in request options for OAuth implementations:
+These methods allow to skip ``method`` field in request options for both OAuth and OAuth2 implementations:
 
 - ``:get(url, options, callback)``
 - ``:post(url, options, callback)``
