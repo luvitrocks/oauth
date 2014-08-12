@@ -74,16 +74,18 @@ Create instance of ``OAuth`` class by calling ``:new(options)`` with options tab
 
 ##### Options
 
-- ``requestUrl``
-- ``accessUrl``
-- ``consumer_key``
-- ``consumer_secret``
-- ``signature_method`` - allowed by [spec](http://oauth.net/core/1.0/) signing crypto method. It could be ``'HMAC-SHA1'``, ``'PLAINTEXT'`` or ``'RSA-SHA1'``, defaults to ``'HMAC-SHA1'``
-- ``authorize_callback``
-- ``version`` - optional spec version, defaults to ``1.0``
+- ``requestUrl`` - required request token url
+- ``accessUrl`` - required oauth token url
+- ``consumer_key`` - required public key
+- ``consumer_secret`` - required private key
+- ``signature_method`` - allowed by [spec](http://oauth.net/core/1.0/) signing crypto method. It could be ``'HMAC-SHA1'`` (default), ``'PLAINTEXT'`` or ``'RSA-SHA1'``
+- ``authorize_callback`` - authorization callback url, defaults to ``nil``
+- ``version`` - optional [spec](http://oauth.net/core/1.0/) version, defaults to ``1.0``
 - ``customHeaders`` - optional table with http headers to be sent in the requests
 
 ##### ``:setClientOptions(options)``
+
+Change things like http methods for request token and access token url.
 
 ##### Options
 
@@ -93,7 +95,7 @@ Create instance of ``OAuth`` class by calling ``:new(options)`` with options tab
 
 ##### ``:getOAuthRequestToken(extraParams, callback)``
 
-Requests an unauthorized request token (http://tools.ietf.org/html/rfc5849#section-2.1).
+Requests an unauthorized request token (http://tools.ietf.org/html/rfc5849#section-2.1). ``extraParams`` is a table value which will be sent with
 
 ##### ``:getOAuthAccessToken(requestToken, requestTokenSecret, oauthVerifier, callback)``
 
@@ -106,8 +108,11 @@ Allows to make OAuth signed requests to provided API ``url`` string.
 ##### Options
 
 - ``method`` - http method that will be send, required (not necessary with [shorteners](https://github.com/luvitrocks/luvit-oauth#shorteners))
-- ``oauth_token`` required
-- ``oauth_token_secret`` required
+- ``oauth_token`` - required
+- ``oauth_token_secret`` - required
+- ``post_body`` - optional
+- ``post_content_type`` - optional, default ``application/x-www-form-urlencoded``
+- ``extraParams`` - optional
 
 ### Shorteners
 
