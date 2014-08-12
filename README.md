@@ -95,7 +95,7 @@ Change things like http methods for request token and access token urls.
 
 ##### ``:getOAuthRequestToken(extraParams, callback)``
 
-Requests an unauthorized request token (http://tools.ietf.org/html/rfc5849#section-2.1). ``extraParams`` is a table value which will be sent with
+Requests an unauthorized request token (http://tools.ietf.org/html/rfc5849#section-2.1). ``extraParams`` is an optional table value which will be sent as querystring or as ``POST`` body.
 
 ##### ``:getOAuthAccessToken(requestToken, requestTokenSecret, oauthVerifier, callback)``
 
