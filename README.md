@@ -85,7 +85,7 @@ Create instance of ``OAuth`` class by calling ``:new(options)`` with options tab
 
 ##### ``:setClientOptions(options)``
 
-Change things like http methods for request token and access token url.
+Change things like http methods for request token and access token urls.
 
 ##### Options
 
