@@ -79,8 +79,9 @@ Create instance of ``OAuth`` class by calling ``:new(options)`` with options tab
 - ``consumer_key`` - required public key
 - ``consumer_secret`` - required private key
 - ``signature_method`` - allowed by [spec](http://oauth.net/core/1.0/) signing crypto method. It could be ``'HMAC-SHA1'`` (default), ``'PLAINTEXT'`` or ``'RSA-SHA1'``
-- ``authorize_callback`` - authorization callback url, defaults to ``nil``
-- ``version`` - optional [spec](http://oauth.net/core/1.0/) version, defaults to ``1.0``
+- ``authorize_callback`` - optional authorization callback url, defaults to ``nil``
+- ``nonce_size`` - size of unique token your application will generate for each unique request, default ``32``
+- ``version`` - [spec](http://oauth.net/core/1.0/) version, defaults to ``1.0``
 - ``customHeaders`` - optional table with http headers to be sent in the requests
 
 ##### ``:setClientOptions(options)``
@@ -95,7 +96,7 @@ Change things like http methods for request token and access token urls.
 
 ##### ``:getOAuthRequestToken(extraParams, callback)``
 
-Requests an unauthorized request token (http://tools.ietf.org/html/rfc5849#section-2.1). ``extraParams`` is an optional table value which will be sent as querystring or as ``application/x-www-form-urlencoded`` ``POST`` body.
+Requests an unauthorized request token (http://tools.ietf.org/html/rfc5849#section-2.1). ``extraParams`` is an optional table value which will be sent as querystring or as ``application/x-www-form-urlencoded`` for ``POST`` body.
 
 ##### ``:getOAuthAccessToken(requestToken, requestTokenSecret, oauthVerifier, callback)``
 
@@ -108,11 +109,11 @@ Allows to make OAuth signed requests to provided API ``url`` string.
 ##### Options
 
 - ``method`` - http method that will be send, required (not necessary with [shorteners](https://github.com/luvitrocks/luvit-oauth#shorteners))
-- ``oauth_token`` - required
-- ``oauth_token_secret`` - required
-- ``post_body`` - optional
-- ``post_content_type`` - optional, default ``application/x-www-form-urlencoded``
-- ``extraParams`` - optional
+- ``oauth_token`` - required access token
+- ``oauth_token_secret`` - required access token secret
+- ``post_body`` - body that will be sent with ``POST`` or ``PUT``
+- ``post_content_type`` - content type for ``POST`` or ``PUT`` requests, default ``application/x-www-form-urlencoded``
+- ``extraParams`` - optional table with values that will be  sent as querystring or ``post_body`` for ``POST`` requests if it's not provided 
 
 ### Shorteners
 
