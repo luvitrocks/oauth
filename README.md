@@ -70,6 +70,8 @@ end)
 
 ##### Initialize
 
+##### ``:new(options)``
+
 Create instance of ``OAuth`` class by calling ``:new(options)`` with options table as the only argument.
 
 ##### Options
@@ -113,17 +115,56 @@ Allows to make OAuth signed requests to provided API ``url`` string.
 - ``oauth_token_secret`` - required access token secret
 - ``post_body`` - body that will be sent with ``POST`` or ``PUT``
 - ``post_content_type`` - content type for ``POST`` or ``PUT`` requests, default ``application/x-www-form-urlencoded``
-- ``extraParams`` - optional table with values that will be  sent as querystring or ``post_body`` for ``POST`` requests if it's not provided 
+- ``extraParams`` - optional table with values that will be sent as querystring or ``post_body`` for ``POST`` requests if it's not provided 
+
+### OAuth 2.0
+
+##### Initialize
+
+##### ``:new(options)``
+
+Create instance of ``OAuth2`` class by calling ``:new(options)`` with ``options`` table as the only argument.
+
+##### Options
+
+- ``clientID`` - required client id
+- ``clientSecret`` - required client secret
+- ``baseSite`` - required base OAuth provider url
+- ``authorizePath`` - optional, default ``'/oauth/authorize'``
+- ``accessTokenPath`` - optional, default ``'/oauth/access_token'``
+- ``customHeaders`` - optional table with http headers to be sent in the requests
+
+###### ``:setAccessTokenName(name)``
+
+###### ``:setAuthMethod(method)``
+
+###### ``:setUseAuthorizationHeaderForGET(useIt)``
+
+###### ``:getAuthorizeUrl(params)``
+
+###### ``:getOAuthAccessToken(code, params, callback)``
+
+###### ``:request(url, opts, callback)``
+
+Allows to make OAuth2 signed requests to provided API ``url`` string.
+
+##### Options
+
+- ``method`` - http method that will be send, required (not necessary with [shorteners](https://github.com/luvitrocks/luvit-oauth#shorteners))
+- ``access_token`` - required access token
+- ``post_body`` - body that will be sent with ``POST`` or ``PUT``
+- ``post_content_type`` - content type for ``POST`` or ``PUT`` requests, default ``application/x-www-form-urlencoded``
+- ``headers`` - optional table with values that will be sent with request
 
 ### Shorteners
 
-These methods allow to skip ``method`` field in request options for both OAuth and OAuth2 implementations:
+These methods allow to skip ``method`` field in request options for both ``OAuth`` and ``OAuth2`` implementations:
 
-- ``:get(url, options, callback)``
-- ``:post(url, options, callback)``
-- ``:put(url, options, callback)``
-- ``:patch(url, options, callback)``
-- ``:delete(url, options, callback)``
+- **``:get(url, options, callback)``**
+- **``:post(url, options, callback)``**
+- **``:put(url, options, callback)``**
+- **``:patch(url, options, callback)``**
+- **``:delete(url, options, callback)``**
 
 ## License
 
