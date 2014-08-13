@@ -134,17 +134,17 @@ Create instance of ``OAuth2`` class by calling ``:new(options)`` with ``options`
 - ``accessTokenPath`` - optional, default ``'/oauth/access_token'``
 - ``customHeaders`` - optional table with http headers to be sent in the requests
 
-###### ``:setAccessTokenName(name)``
+##### ``:setAccessTokenName(name)``
 
-###### ``:setAuthMethod(method)``
+##### ``:setAuthMethod(method)``
 
-###### ``:setUseAuthorizationHeaderForGET(useIt)``
+##### ``:setUseAuthorizationHeaderForGET(useIt)``
 
-###### ``:getAuthorizeUrl(params)``
+##### ``:getAuthorizeUrl(params)``
 
-###### ``:getOAuthAccessToken(code, params, callback)``
+##### ``:getOAuthAccessToken(code, params, callback)``
 
-###### ``:request(url, opts, callback)``
+##### ``:request(url, opts, callback)``
 
 Allows to make OAuth2 signed requests to provided API ``url`` string.
 
