@@ -136,13 +136,23 @@ Create instance of ``OAuth2`` class by calling ``:new(options)`` with ``options`
 
 ##### ``:setAccessTokenName(name)``
 
+Change ``access_token`` param name to different one if authorization server waits for another.
+
 ##### ``:setAuthMethod(method)``
+
+Change authorization method that defaults to ``Bearer``.
 
 ##### ``:setUseAuthorizationHeaderForGET(useIt)``
 
+If you use the ``OAuth2`` exposed ``:get()`` shortener method this will specify whether to use an ``'Authorization'`` header instead of passing the ``access_token`` as a query parameter.
+
 ##### ``:getAuthorizeUrl(params)``
 
+Get an authorization url to proceed flow and receive ``code`` that will be used for getting ``access_token``.
+
 ##### ``:getOAuthAccessToken(code, params, callback)``
+
+Get an access token from the authorization server.
 
 ##### ``:request(url, opts, callback)``
 

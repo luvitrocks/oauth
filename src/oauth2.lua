@@ -184,9 +184,18 @@ function OAuth:_createClient (port, hostname, method, path, headers, protocol)
 	return httpModel.request(options)
 end
 
+function OAuth:buildAuthHeader (access_token)
+	return self.authMethod .. ' ' .. access_token
+end
+
 -- shorteners
 function OAuth:get(url, opts, callback)
 	opts, callback = self:_shortenerValidator('GET', opts, callback)
+	opts.headers = opts.headers or {}
+	if self.useAuthorizationHeaderForGET then
+		opts.headers['Authorization'] = self:buildAuthHeader(opts.access_token)
+		opts.access_token = nil
+	end
 	return self:request(url, opts, callback)
 end
 
