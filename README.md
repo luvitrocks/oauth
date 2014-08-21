@@ -13,7 +13,7 @@ npm install luvit-oauth
 If you're not familiar with npm check this out:
 
 - https://github.com/voronianski/luvit-npm-example#how-to
-- https://github.com/luvitrocks/luvit-utopia#install
+- https://github.com/luvitrocks/luvit-module-boilerplate#whats-npm
 
 ## Examples
 
