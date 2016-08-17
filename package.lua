@@ -1,6 +1,6 @@
 return {
   name = 'voronianski/oauth',
-  version = '1.0.0',
+  version = '1.0.2',
   description = 'OAuth wrapper for Luvit.io',
   repository = {
     url = 'https://github.com/luvitrocks/luvit-oauth.git',
@@ -11,9 +11,7 @@ return {
     email = 'dmitri.voronianski@gmail.com'
   },
   homepage = 'https://github.com/luvitrocks/luvit-oauth',
-  dependencies = {
-    'filwisher/lua-tape'
-  },
+  dependencies = {},
   licenses = {'MIT'},
   files = {
     '**.lua',
