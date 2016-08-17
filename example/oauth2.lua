@@ -5,8 +5,9 @@ local oauth2 = OAuth2:new({
   clientSecret = '{YOUR CLIENT SECRET}',
   baseSite = 'https://github.com/login'
 })
-
-local opts = {redirect_uri = 'http://luvit.io/oauth'}
+local opts = {
+  redirect_uri = '{YOUR REDIRECT URI}'
+}
 
 p('-----> Starting Github OAuth2')
 local authURL = oauth2:getAuthorizeUrl(opts)
@@ -19,10 +20,10 @@ process.stdin:on('data', function (line)
   local code = line:gsub('\n', '')
   oauth2:getOAuthAccessToken(tostring(code), opts, function (err, access_token, refresh_token, results)
     p(err, access_token, refresh_token, results)
-    process.exit()
+    process:exit(0)
   end)
 end)
 process.stdin:on('end', function ()
-  process.exit()
+  process:exit(0)
 end)
-process.stdin:readStart()
+process.stdin:read()

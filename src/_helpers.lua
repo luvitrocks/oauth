@@ -1,7 +1,7 @@
 local string = require('string')
 local math = require('math')
 local table = require('table')
-local crypto = require('_crypto')
+local crypto = require('tls/lcrypto')
 local os = require('os')
 local qs = require('querystring')
 

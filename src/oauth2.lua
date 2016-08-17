@@ -1,5 +1,5 @@
 local Object = require('core').Object
-local crypto = require('_crypto')
+local crypto = require('tls/lcrypto')
 local http = require('http')
 local https = require('https')
 local qs = require('querystring')
@@ -66,13 +66,14 @@ function OAuth:getOAuthAccessToken (code, params, callback)
 
     -- As of http://tools.ietf.org/html/draft-ietf-oauth-v2-07
     -- responses should be in JSON
-    local parseStatus, results = pcall(JSON.parse, data)
-    if not parseStatus then
+    local results, line, parseError = JSON.parse(data)
+    if parseError then
       results = qs.parse(data)
     end
 
     local access_token = results['access_token']
     local refresh_token = results['refresh_token']
+
     callback(nil, access_token, refresh_token, results)
   end)
 end

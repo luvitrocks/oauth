@@ -1,5 +1,5 @@
 local Object = require('core').Object
-local crypto = require('_crypto')
+local crypto = require('tls/lcrypto')
 local http = require('http')
 local https = require('https')
 local qs = require('querystring')
