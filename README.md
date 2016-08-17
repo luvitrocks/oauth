@@ -1,19 +1,14 @@
-# luvit-oauth
+# Oauth
 
-[![NPM version](https://badge.fury.io/js/luvit-oauth.svg)](http://badge.fury.io/js/luvit-oauth)
-
-Simple [OAuth](http://en.wikipedia.org/wiki/OAuth) and [OAuth2](http://en.wikipedia.org/wiki/OAuth2#OAuth_2.0) API for [luvit.io](http://luvit.io). It allows users to authenticate against providers and thus act as OAuth consumers. Tested against Twitter (http://twitter.com) and Github (http://github.com).
+> Simple [OAuth](http://en.wikipedia.org/wiki/OAuth) and [OAuth2](http://en.wikipedia.org/wiki/OAuth2#OAuth_2.0) API for [Luvit.io](http://luvit.io). It allows users to authenticate against providers and thus act as OAuth consumers. Tested against Twitter (http://twitter.com) and Github (http://github.com).
 
 ## Install
 
+Since version `1.0.0` Utopia uses [lit](https://github.com/luvit/lit) as dependency manager:
+
 ```bash
-npm install luvit-oauth
+lit install voronianski/oauth
 ```
-
-If you're not familiar with npm check this out:
-
-- https://github.com/voronianski/luvit-npm-example#how-to
-- https://github.com/luvitrocks/luvit-module-boilerplate#whats-npm
 
 ## Examples
 
@@ -180,7 +175,7 @@ These methods allow to skip ``method`` field in request options for both ``OAuth
 
 MIT Licensed
 
-Copyright (c) 2014 Dmitri Voronianski [dmitri.voronianski@gmail.com](mailto:dmitri.voronianski@gmail.com)
+Copyright (c) 2014-2016 Dmitri Voronianski [dmitri.voronianski@gmail.com](mailto:dmitri.voronianski@gmail.com)
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
