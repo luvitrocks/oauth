@@ -1,4 +1,4 @@
-# Oauth
+# OAuth
 
 > Simple [OAuth](http://en.wikipedia.org/wiki/OAuth) and [OAuth2](http://en.wikipedia.org/wiki/OAuth2#OAuth_2.0) API for [Luvit.io](http://luvit.io). It allows users to authenticate against providers and thus act as OAuth consumers. Tested against Twitter (http://twitter.com) and Github (http://github.com).
 
